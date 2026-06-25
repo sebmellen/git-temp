@@ -1,0 +1,21 @@
+{
+  "name": "git-temp",
+  "version": "0.1.0",
+  "description": "Initialize a Git-local AI scratchpad ignored via .git/info/exclude.",
+  "type": "module",
+  "bin": {
+    "git-temp": "./bin/git-temp.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT",
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
