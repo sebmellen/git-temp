@@ -1,5 +1,7 @@
 # git-temp
 
+[![npm](https://img.shields.io/npm/v/git-temp.svg)](https://www.npmjs.com/package/git-temp)
+
 Purpose: create a local AI scratchpad inside a Git repo without committing it.
 
 `git-temp` makes a `temp/` folder, adds it to `.git/info/exclude`, and keeps it visible to editors and AI tools. That means no noisy `git status`, no accidental commits, and no `.gitignore` rule that hides files from indexing or `@` tagging.
