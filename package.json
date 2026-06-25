@@ -4,7 +4,7 @@
   "description": "Initialize a Git-local AI scratchpad ignored via .git/info/exclude.",
   "type": "module",
   "bin": {
-    "git-temp": "./bin/git-temp.js"
+    "git-temp": "bin/git-temp.js"
   },
   "scripts": {
     "test": "node --test"
