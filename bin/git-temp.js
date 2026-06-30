@@ -2,7 +2,7 @@
 import { execFileSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,27 +17,44 @@ const INSTRUCTION_FILES = [
   '.github/copilot-instructions.md',
 ];
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isCliEntry()) {
   main().catch((error) => {
     console.error(`git-temp: ${error.message}`);
     process.exit(1);
   });
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-  const command = args[0];
+function isCliEntry(argvPath = process.argv[1]) {
+  try {
+    return Boolean(argvPath) && realpathSync(argvPath) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
 
-  if (!command || command === 'init' || !['status', 'clean', 'integrate', 'help', '--help', '-h'].includes(command)) {
-    const dir = command === 'init' ? args[1] : command;
-    await initScratchpad(dir || DEFAULT_DIR, { integrate: args.includes('--integrate') });
-    return;
+async function main() {
+  const parsed = parseArgs(process.argv.slice(2));
+
+  if (parsed.command === 'init') return initScratchpad(parsed.dir || DEFAULT_DIR, { integrate: parsed.integrate });
+  if (parsed.command === 'status') return status(parsed.dir || DEFAULT_DIR);
+  if (parsed.command === 'clean') return clean(parsed.dir || DEFAULT_DIR, parsed.force);
+  if (parsed.command === 'integrate') return integrate(parsed.dir || DEFAULT_DIR);
+  printHelp();
+}
+
+function parseArgs(args) {
+  const unknown = args.find((arg) => arg.startsWith('-') && !['--integrate', '--force', '-f', '--help', '-h'].includes(arg));
+  if (unknown) throw new Error(`unknown option: ${unknown}`);
+  if (args.includes('--help') || args.includes('-h') || args[0] === 'help') return { command: 'help' };
+
+  const positionals = args.filter((arg) => !arg.startsWith('-'));
+  const command = positionals[0];
+
+  if (!command || command === 'init' || !['status', 'clean', 'integrate'].includes(command)) {
+    return { command: 'init', dir: command === 'init' ? positionals[1] : command, integrate: args.includes('--integrate') };
   }
 
-  if (command === 'status') return status(args[1] || DEFAULT_DIR);
-  if (command === 'clean') return clean(args[1] && !args[1].startsWith('-') ? args[1] : DEFAULT_DIR, args.includes('--force') || args.includes('-f'));
-  if (command === 'integrate') return integrate(args[1] || DEFAULT_DIR);
-  printHelp();
+  return { command, dir: positionals[1], force: args.includes('--force') || args.includes('-f') };
 }
 
 async function initScratchpad(dir, options = {}) {
@@ -169,4 +186,4 @@ function printHelp() {
   console.log(`Usage:\n  git-temp [directory] [--integrate]\n  git-temp status [directory]\n  git-temp clean [directory] [--force]\n  git-temp integrate [directory]`);
 }
 
-export { cleanRelative, formatBytes, instructionSnippet, scratchpadReadme };
+export { cleanRelative, formatBytes, instructionSnippet, isCliEntry, parseArgs, scratchpadReadme };
