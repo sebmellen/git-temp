@@ -1,6 +1,6 @@
 {
   "name": "git-temp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Initialize a Git-local AI scratchpad ignored via .git/info/exclude.",
   "type": "module",
   "bin": {
